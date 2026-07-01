@@ -1,0 +1,168 @@
+/* DVNA Editor — lo-fi 8-bit terminal theme (black / white / red). */
+:root {
+  color-scheme: dark;
+  /* Palette */
+  --bg: #0a0a0a;
+  --panel: #111111;
+  --panel-2: #161616;
+  --border: #2b2b2b;
+  --text: #d6d6d6;
+  --text-bright: #f2f2f2;
+  --dim: #7d7d7d;
+  --desc: #9a9a9a;
+  --red: #e2231a;
+  --red-bright: #ff453a;
+  --red-dim: #7a1612;
+  /* Mono stack — crisp, terminal-like; no external fonts (offline). */
+  --mono: ui-monospace, "SF Mono", "DejaVu Sans Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* CRT scanline + vignette overlay (fixed, non-interactive). Kept subtle for readability. */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.08) 3px,
+      rgba(0, 0, 0, 0.08) 3px
+    ),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 65%, rgba(0, 0, 0, 0.25) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Shared form controls */
+select,
+input[type='number'],
+input[type='range'] {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text-bright);
+  border: 1px solid var(--border);
+}
+
+input[type='range'] {
+  accent-color: var(--red);
+}
+
+input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font-family: var(--mono);
+}
+
+/* Blinking cursor (unused by default; kept available) */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-dim);
+}
+
+/* Shared parameter row */
+.param-row {
+  border-bottom: 1px dashed var(--border);
+  padding: 0.55rem 0.6rem;
+}
+.param-row:hover {
+  background: var(--panel-2);
+}
+.param-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.param-name {
+  flex: 0 0 13rem;
+  text-transform: uppercase;
+  color: var(--text-bright);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.param-ctrl {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+.param-desc {
+  margin: 0.25rem 0 0;
+  padding-left: 0.1rem;
+  color: var(--desc);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.param-unit {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  color: var(--dim);
+  min-width: 1.6ch;
+  text-align: right;
+  text-transform: uppercase;
+}
+.param-slider {
+  flex: 0 0 150px;
+}
+.param-num {
+  flex: 0 0 4.6rem;
+  background: var(--bg);
+  color: var(--text-bright);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.param-select {
+  flex: 0 1 auto;
+  min-width: 0;
+  background: var(--bg);
+  color: var(--text-bright);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  max-width: 55%;
+}

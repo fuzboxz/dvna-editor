@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Strict Content Security Policy (secure-by-default).
+      - default-src 'self': everything (scripts, frames, workers, images, fonts) from this origin only.
+      - script-src 'self': no inline <script>, no 'unsafe-inline', no 'unsafe-eval' anywhere.
+      - style-src 'self': production ships component styles as a single external stylesheet, so no
+        'unsafe-inline'. (In dev, Vite injects CSS via inline <style> for HMR, so the csp-per-env
+        plugin below adds 'unsafe-inline' to style-src ONLY during `vite serve`.)
+      - connect-src 'self': forbids any runtime network call (fetch/XHR/WebSocket) beyond self;
+        combined with the offline design, the app makes ZERO network requests at runtime.
+      - object-src 'none'; base-uri 'self'; form-action 'self'.
+      - Note: frame-ancestors / sandbox cannot be set via <meta> (browsers ignore them) and GitHub
+        Pages allows no custom headers, so clickjacking CSP is not enforceable here.
+      - Web MIDI is a browser API, not a network request, so it is unaffected by CSP.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    />
+    <title>DVNA Editor</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

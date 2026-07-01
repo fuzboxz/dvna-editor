@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Local-only working material — never committed.
+# Working docs/notes/binaries stay private; only root-level public docs we author
+# explicitly (README.md, a future firmware.md, …) are committed.
+docs/
+firmware-re/
+__pycache__/
+*.pyc
+*.bin
+*.uf2
+
+# Coverage / temp / scratch
+coverage/
+.vitest
+tmp/
+.cache/
+.env
+.env.*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

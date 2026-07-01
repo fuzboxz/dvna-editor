@@ -1,0 +1,61 @@
+# Run GitHub CodeQL semantic analysis on pull requests and the main branch.
+#
+# Security posture:
+#   - Least privilege: contents: read (checkout + build) only; CodeQL needs no
+#     write scopes or secrets to upload results to the security tab.
+#   - First-party actions pinned to immutable commit SHAs (not moving tags).
+#   - Scans PRs (so untrusted contributions are analyzed before merge) and the
+#     main branch (baseline). Scheduled weekly sweep for new queries.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '23 6 * * 1' # weekly, Monday 06:23 UTC (off-peak)
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # upload CodeQL results to the Security tab
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@dd903d2e4f5405488e5ef1422510ee31c8b32357 # github/codeql-action/init v3
+        with:
+          languages: ${{ matrix.language }}
+          # Default "default" query suite = security + some quality. Keep it tight.
+          queries: security-extended
+
+      # The app is a static Svelte/Vite bundle with no build step required for
+      # CodeQL's JS/TS analysis (it analyzes source directly), but building first
+      # lets it see generated/derived files if any are added later.
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # actions/setup-node v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@dd903d2e4f5405488e5ef1422510ee31c8b32357 # github/codeql-action/analyze v3
