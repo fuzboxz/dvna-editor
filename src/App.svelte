@@ -38,6 +38,26 @@
     arp: 'ARP',
   };
 
+  // ARIA tab ids (roving tabindex pattern).
+  const tabId = (id: ParamGroup) => `tab-${id}`;
+  const PANEL_ID = 'panel-params';
+
+  // Arrow / Home / End keyboard navigation between tabs (WAI-ARIA tabs pattern).
+  function onTabKeydown(e: KeyboardEvent, index: number) {
+    const n = PARAM_GROUPS.length;
+    let next = index;
+    switch (e.key) {
+      case 'ArrowRight': next = (index + 1) % n; break;
+      case 'ArrowLeft': next = (index - 1 + n) % n; break;
+      case 'Home': next = 0; break;
+      case 'End': next = n - 1; break;
+      default: return;
+    }
+    e.preventDefault();
+    activeGroup = PARAM_GROUPS[next].id;
+    queueMicrotask(() => document.getElementById(tabId(PARAM_GROUPS[next].id))?.focus());
+  }
+
   function surprise() {
     const vals = randomizeValues();
     for (const p of PARAMS) {
@@ -101,14 +121,14 @@
   <!-- Terminal title bar -->
   <header class="term-bar">
     <div class="brand">
-      <span class="title">DVNA:EDIT</span>
+      <h1 class="title">DVNA:EDIT</h1>
     </div>
     <div class="tools">
       <button class="btn" onclick={() => midi.connect()} disabled={midi.status === 'connecting'}>
         {midi.status === 'connected' ? 'RECONNECT' : 'CONNECT'}
       </button>
       {#if debug && midi.status !== 'connected'}
-        <button class="btn" onclick={() => midi.enableMock()} title="Dev: fake MIDI output, no device needed">🧪 MOCK</button>
+        <button class="btn" onclick={() => midi.enableMock()} title="Dev: fake MIDI output, no device needed"><span class="emoji" aria-hidden="true">🧪</span> MOCK</button>
       {/if}
       {#if midi.status === 'connected'}
         <button class="btn icon-btn" onclick={() => (saveModalOpen = true)} title="Save preset to JSON file">
@@ -124,10 +144,11 @@
           class="hidden-input"
           type="file"
           accept=".json,application/json"
+          aria-label="Load preset from JSON file"
           onchange={onFile}
         />
-        <button class="btn" onclick={surprise} title="Randomize every parameter">🎲 ALL</button>
-        <button class="btn btn-red" onclick={() => midi.panic()} title="All Notes Off + All Sound Off">⏹ PANIC</button>
+        <button class="btn" onclick={surprise} title="Randomize every parameter"><span class="emoji" aria-hidden="true">🎲</span> ALL</button>
+        <button class="btn btn-red" onclick={() => midi.panic()} title="All Notes Off + All Sound Off"><span class="emoji" aria-hidden="true">⏹</span> PANIC</button>
         <label class="field">
           OUT
           <select value={midi.selectedOutputId} onchange={(e) => midi.selectOutput(e.currentTarget.value)}>
@@ -145,7 +166,7 @@
           </select>
         </label>
       {/if}
-      <span class="status" data-status={midi.status}>● {statusText[midi.status]}</span>
+      <span class="status" role="status" data-status={midi.status}>● {statusText[midi.status]}</span>
     </div>
   </header>
 
@@ -156,28 +177,34 @@
     <div class="notice">⚠ {midi.error}</div>
   {/if}
   {#if message}
-    <div class="notice" data-kind={message.kind}>{message.kind === 'ok' ? '✓' : '⚠'} {message.text}</div>
+    <div class="notice" role="status" aria-live="polite" data-kind={message.kind}>{message.kind === 'ok' ? '✓' : '⚠'} {message.text}</div>
   {/if}
 
   {#if midi.status === 'connected'}
-    <!-- Tab bar -->
-    <nav class="tabs">
-      {#each PARAM_GROUPS as group}
+    <!-- Tab bar (ARIA tabs pattern) -->
+    <div class="tabs" role="tablist" aria-label="Parameter groups">
+      {#each PARAM_GROUPS as group, i}
         <button
           class="tab"
           class:active={activeGroup === group.id}
+          id={tabId(group.id)}
+          role="tab"
+          aria-selected={activeGroup === group.id}
+          aria-controls={PANEL_ID}
+          tabindex={activeGroup === group.id ? 0 : -1}
           onclick={() => (activeGroup = group.id)}
+          onkeydown={(e) => onTabKeydown(e, i)}
           title={group.label}
         >
           {TAB_CODE[group.id]}
         </button>
       {/each}
-    </nav>
+    </div>
 
     <!-- Active group panel -->
-    <section class="panel">
+    <div class="panel" id={PANEL_ID} role="tabpanel" aria-labelledby={tabId(activeGroup)} tabindex="0">
       <div class="panel-head">
-        <span class="panel-title">{PARAM_GROUPS.find((g) => g.id === activeGroup)?.label}</span>
+        <h2 class="panel-title">{PARAM_GROUPS.find((g) => g.id === activeGroup)?.label}</h2>
         <div class="panel-actions">
           <span class="panel-count">{paramsInGroup(activeGroup).length} PARAMS</span>
           <button
@@ -186,7 +213,7 @@
             disabled={randomizableOnPage.length === 0}
             title="Randomize only this page"
           >
-            🎲 RANDOMIZE PAGE
+            <span class="emoji" aria-hidden="true">🎲</span> RANDOMIZE PAGE
           </button>
         </div>
       </div>
@@ -199,7 +226,7 @@
           {/if}
         {/each}
       </div>
-    </section>
+    </div>
   {/if}
 
   {#if midi.isMock}
@@ -242,6 +269,8 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-weight: bold;
+    margin: 0;
+    font-size: 1em;
   }
   .tools {
     display: flex;
@@ -393,6 +422,7 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-size: 0.78rem;
+    margin: 0;
   }
   .panel-count {
     color: var(--dim);
@@ -401,5 +431,9 @@
   }
   .rows {
     padding: 0 0.2rem;
+  }
+  /* The tabpanel is focusable; keep its focus subtle. */
+  .panel:focus-visible {
+    outline: none;
   }
 </style>

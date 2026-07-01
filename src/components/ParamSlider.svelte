@@ -18,6 +18,8 @@
   const decimals = $derived(scale.step < 1 ? 1 : 0);
   const numValue = $derived(Number(sliderValue.toFixed(decimals)));
   const description = $derived(describe(param));
+  // Accessible name for the controls: param name + unit (description is shown visually too).
+  const ariaLabel = $derived(`${param.name} (${scale.unit})`);
 
   function commit(v: number) {
     oninput(scale.toCC(v, param));
@@ -31,6 +33,7 @@
       <input
         class="param-slider"
         type="range"
+        aria-label={ariaLabel}
         min={scale.displayMin}
         max={scale.displayMax}
         step={scale.step}
@@ -40,6 +43,7 @@
       <input
         class="param-num"
         type="number"
+        aria-label={ariaLabel}
         min={scale.displayMin}
         max={scale.displayMax}
         step={scale.step}

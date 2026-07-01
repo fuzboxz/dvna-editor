@@ -27,7 +27,7 @@
   <div class="param-head">
     <span class="param-name">{param.name}</span>
     <span class="param-ctrl">
-      <select class="param-select" value={selectedIndex} onchange={choose}>
+      <select class="param-select" aria-label={param.name} value={selectedIndex} onchange={choose}>
         {#each opts as label, i}
           <option value={i}>{label}</option>
         {/each}

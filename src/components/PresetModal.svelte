@@ -8,12 +8,18 @@
   let name = $state('');
   const canSave = $derived(isValidName(name));
   let inputEl = $state<HTMLInputElement | null>(null);
+  let dialogEl = $state<HTMLDivElement | null>(null);
+  let lastFocused: HTMLElement | null = null;
 
-  // Clear the field + focus whenever the modal opens.
+  // On open: clear the field + focus it. On close: restore focus to the trigger.
   $effect(() => {
     if (open) {
+      lastFocused = (document.activeElement as HTMLElement) ?? null;
       name = '';
       queueMicrotask(() => inputEl?.focus());
+    } else {
+      queueMicrotask(() => lastFocused?.focus?.());
+      lastFocused = null;
     }
   });
 
@@ -37,12 +43,30 @@
     close();
   }
 
+  // Escape closes; Tab is trapped within the dialog (WAI-ARIA dialog pattern).
   function onKey(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Escape') {
       e.preventDefault();
-      save();
-    } else if (e.key === 'Escape') {
       close();
+      return;
+    }
+    if (e.key === 'Tab' && dialogEl) {
+      const focusables = Array.from(
+        dialogEl.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select, textarea, [href], [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   }
 </script>
@@ -51,6 +75,7 @@
   <div class="backdrop"></div>
   <div
     class="modal"
+    bind:this={dialogEl}
     role="dialog"
     aria-modal="true"
     aria-label="Save preset"
@@ -135,8 +160,9 @@
     font-size: 0.85rem;
     font-family: var(--mono);
   }
-  .m-input:focus {
-    outline: none;
+  .m-input:focus-visible {
+    outline: 2px solid var(--text-bright);
+    outline-offset: 0;
     border-color: var(--text);
   }
   .m-actions {

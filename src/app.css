@@ -8,7 +8,7 @@
   --border: #2b2b2b;
   --text: #d6d6d6;
   --text-bright: #f2f2f2;
-  --dim: #7d7d7d;
+  --dim: #8c8c8c;
   --desc: #9a9a9a;
   --red: #e2231a;
   --red-bright: #ff453a;
@@ -73,6 +73,15 @@ input[type='number'] {
 
 button {
   font-family: var(--mono);
+}
+
+/* Visible keyboard focus for all interactive controls. */
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--text-bright);
+  outline-offset: 1px;
+}
+input[type='range']:focus-visible {
+  outline-offset: 3px;
 }
 
 /* Blinking cursor (unused by default; kept available) */
