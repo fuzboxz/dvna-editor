@@ -10,7 +10,6 @@ function cspPerEnv() {
     name: 'csp-per-env',
     apply: 'serve' as const,
     transformIndexHtml(html: string) {
-      if (!isDev) return html
       return html.replace(
         /style-src 'self'(?=[';])/,
         "style-src 'self' 'unsafe-inline'",
