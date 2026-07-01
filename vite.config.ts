@@ -10,12 +10,11 @@ function cspPerEnv() {
     name: 'csp-per-env',
     apply: 'serve' as const,
     transformIndexHtml(html: string) {
-      const next = html.replace(
+      if (!isDev) return html
+      return html.replace(
         /style-src 'self'(?=[';])/,
         "style-src 'self' 'unsafe-inline'",
       )
-      console.error(`[csp-per-env] transformed: ${next.includes("'unsafe-inline'") ? 'YES' : 'NO'}`)
-      return next
     },
   }
 }
